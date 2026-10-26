@@ -1,0 +1,23 @@
+{
+  "name": "@libraryofalexandria/cli",
+  "version": "0.1.0",
+  "description": "The loa command: search the Library of Alexandria catalogue, read book facts and print editions from a terminal. No dependencies. Imports the client by relative path (../sdk/typescript/loa.mjs): run it from the kit folder.",
+  "type": "module",
+  "bin": {
+    "loa": "./loa.mjs"
+  },
+  "files": [
+    "loa.mjs",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "books",
+    "library",
+    "cli",
+    "classics"
+  ],
+  "homepage": "https://libraryofalexandria.com/pages/developers"
+}

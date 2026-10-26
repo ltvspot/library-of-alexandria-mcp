@@ -1,0 +1,13 @@
+{
+  "name": "@libraryofalexandria/sdk",
+  "version": "0.1.0",
+  "description": "JavaScript and TypeScript client for the Library of Alexandria API (catalogue, free shelf, print editions). No dependencies.",
+  "type": "module",
+  "main": "./loa.mjs",
+  "types": "./loa.d.ts",
+  "exports": { ".": { "types": "./loa.d.ts", "default": "./loa.mjs" } },
+  "files": ["loa.mjs", "loa.d.ts", "README.md"],
+  "engines": { "node": ">=18" },
+  "keywords": ["books", "library", "classics", "mcp", "openapi"],
+  "homepage": "https://libraryofalexandria.com/pages/developers"
+}

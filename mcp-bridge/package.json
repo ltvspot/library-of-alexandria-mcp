@@ -1,0 +1,11 @@
+{
+  "name": "@libraryofalexandria/mcp",
+  "version": "0.1.0",
+  "description": "stdio bridge to the Library of Alexandria MCP server for clients that only speak stdio. No dependencies.",
+  "type": "module",
+  "bin": { "loa-mcp": "./loa-mcp.mjs" },
+  "files": ["loa-mcp.mjs", "README.md"],
+  "engines": { "node": ">=18" },
+  "keywords": ["mcp", "model-context-protocol", "books", "library"],
+  "homepage": "https://libraryofalexandria.com/pages/developers"
+}

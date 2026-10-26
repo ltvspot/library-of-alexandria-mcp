@@ -1,0 +1,1663 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Library of Alexandria API",
+    "version": "2026-10-25",
+    "summary": "Look up the library's catalogue, free shelf and print editions.",
+    "description": "Library of Alexandria Press publishes the world's classic books in today's language, in 25 languages. This API gives every tool of the library's MCP server as one plain HTTP operation: POST /v1/<tool> with a JSON body of the tool's arguments. All operations only read: none signs anyone in, takes a payment or changes anything. Every title comes back with the address of its page on libraryofalexandria.com, where a person reads, listens, prints or starts. No key is needed. Errors are problem+json (RFC 9457).",
+    "termsOfService": "https://libraryofalexandria.com/policies/terms-of-service",
+    "contact": {
+      "name": "Library of Alexandria Press",
+      "url": "https://libraryofalexandria.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.libraryofalexandria.com",
+      "description": "This service"
+    }
+  ],
+  "security": [],
+  "externalDocs": {
+    "description": "Developer documentation",
+    "url": "https://libraryofalexandria.com/pages/developers"
+  },
+  "tags": [
+    {
+      "name": "catalogue",
+      "description": "Find a book and read its facts."
+    },
+    {
+      "name": "free-shelf",
+      "description": "The free shelf and its chapters."
+    },
+    {
+      "name": "print",
+      "description": "Print editions of a book."
+    },
+    {
+      "name": "publisher",
+      "description": "About the publisher."
+    },
+    {
+      "name": "other",
+      "description": "Other operations."
+    }
+  ],
+  "paths": {
+    "/v1/search_books": {
+      "post": {
+        "operationId": "search_books",
+        "summary": "Search books",
+        "description": "Search the catalogue of Library of Alexandria Press by words from a title or an author's name, or by a topic word, in any language of the catalogue (Chinese in simplified and traditional characters). Returns up to 8 titles with id, title, subtitle, author, language, whether print editions are available, and the address of the title page on libraryofalexandria.com. Pass the asker's language so titles and authors come back in it.",
+        "tags": [
+          "catalogue"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Words from a title or an author's name, or a topic word, in any language. Example: 'Moby Dick', 'Dostoevsky', 'war strategy'.",
+                    "maxLength": 200
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "es",
+                      "de",
+                      "nl",
+                      "fr",
+                      "it",
+                      "pt-BR",
+                      "ru",
+                      "zh-CN",
+                      "zh-TW",
+                      "ja",
+                      "ko",
+                      "pl",
+                      "ar",
+                      "hi",
+                      "id"
+                    ],
+                    "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Number of titles to return, 1 to 8. Default 8.",
+                    "minimum": 1,
+                    "maximum": 8
+                  }
+                },
+                "required": [
+                  "query"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "query": "Moby Dick"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The tool's answer in the envelope.",
+            "headers": {
+              "LOA-Version": {
+                "description": "The version date of this API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchBooksResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/get_book": {
+      "post": {
+        "operationId": "get_book",
+        "summary": "Get book facts",
+        "description": "Get the catalogue facts of one title: title, subtitle, author and original title in the chosen language, the cover picture address, the print editions, and the title page address in each language of the catalogue.",
+        "tags": [
+          "catalogue"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Title id as found in a search result, for example top3500-00013 or forbidden-00004. A plain number is read as a number of the main list."
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "es",
+                      "de",
+                      "nl",
+                      "fr",
+                      "it",
+                      "pt-BR",
+                      "ru",
+                      "zh-CN",
+                      "zh-TW",
+                      "ja",
+                      "ko",
+                      "pl",
+                      "ar",
+                      "hi",
+                      "id"
+                    ],
+                    "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "id": "top3500-00002"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The tool's answer in the envelope.",
+            "headers": {
+              "LOA-Version": {
+                "description": "The version date of this API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBookResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/get_summary": {
+      "post": {
+        "operationId": "get_summary",
+        "summary": "Get summary",
+        "description": "Read the 15-minute summary of one title: the first key idea in full, with its heading, and the headings of the other key ideas, which open in the library. Choose a key idea with 'part'. A title or a language whose summary is not open yet answers that it opens here soon.",
+        "tags": [
+          "catalogue"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Title id as found in a search result, for example top3500-00013 or forbidden-00004. A plain number is read as a number of the main list."
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "es",
+                      "de",
+                      "nl",
+                      "fr",
+                      "it",
+                      "pt-BR",
+                      "ru",
+                      "zh-CN",
+                      "zh-TW",
+                      "ja",
+                      "ko",
+                      "pl",
+                      "ar",
+                      "hi",
+                      "id"
+                    ],
+                    "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+                  },
+                  "part": {
+                    "type": "integer",
+                    "description": "Number of the key idea, starting at 1. Default 1. Only the first key idea is given in full.",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "id": "top3500-00002"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The tool's answer in the envelope.",
+            "headers": {
+              "LOA-Version": {
+                "description": "The version date of this API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSummaryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/get_sample": {
+      "post": {
+        "operationId": "get_sample",
+        "summary": "Get sample pages",
+        "description": "Read the free opening of one title: the first chapter of its text, in pages of at most 400 words. Pass 'page' for the next page; every answer says how many pages there are and where the text continues. Until the text is open the answer says that it opens here soon.",
+        "tags": [
+          "catalogue"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Title id as found in a search result, for example top3500-00013 or forbidden-00004. A plain number is read as a number of the main list."
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "es",
+                      "de",
+                      "nl",
+                      "fr",
+                      "it",
+                      "pt-BR",
+                      "ru",
+                      "zh-CN",
+                      "zh-TW",
+                      "ja",
+                      "ko",
+                      "pl",
+                      "ar",
+                      "hi",
+                      "id"
+                    ],
+                    "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+                  },
+                  "page": {
+                    "type": "integer",
+                    "description": "Page of the sample, starting at 1. Default 1. Each page has at most 400 words.",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "id": "top3500-00002"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The tool's answer in the envelope.",
+            "headers": {
+              "LOA-Version": {
+                "description": "The version date of this API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSampleResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/list_free_shelf": {
+      "post": {
+        "operationId": "list_free_shelf",
+        "summary": "List the free shelf",
+        "description": "List the titles on the free shelf, optionally for one language and one subject, with the address of each reading page.",
+        "tags": [
+          "free-shelf"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "es",
+                      "de",
+                      "nl",
+                      "fr",
+                      "it",
+                      "pt-BR",
+                      "ru",
+                      "zh-CN",
+                      "zh-TW",
+                      "ja",
+                      "ko",
+                      "pl",
+                      "ar",
+                      "hi",
+                      "id"
+                    ],
+                    "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+                  },
+                  "subject": {
+                    "type": "string",
+                    "description": "A subject word, for example 'philosophy' or 'poetry'.",
+                    "maxLength": 100
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Number of titles to return, 1 to 8. Default 8.",
+                    "minimum": 1,
+                    "maximum": 8
+                  }
+                },
+                "additionalProperties": false
+              },
+              "example": {
+                "language": "en",
+                "limit": 3
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The tool's answer in the envelope.",
+            "headers": {
+              "LOA-Version": {
+                "description": "The version date of this API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListFreeShelfResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/read_free_chapter": {
+      "post": {
+        "operationId": "read_free_chapter",
+        "summary": "Read a free chapter",
+        "description": "Read one chapter of a title on the free shelf, in pages of at most 400 words. Chapter numbers are those of the reader's contents list; without 'chapter' the first chapter of the text is read. Every answer points to the next page. Until the text is open the answer says that it opens here soon.",
+        "tags": [
+          "free-shelf"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Title id as found in a search result, for example top3500-00013 or forbidden-00004. A plain number is read as a number of the main list."
+                  },
+                  "chapter": {
+                    "type": "integer",
+                    "description": "Chapter number as in the reader's contents list, starting at 1. Default: the first chapter of the text.",
+                    "minimum": 1
+                  },
+                  "page": {
+                    "type": "integer",
+                    "description": "Page of the chapter, starting at 1. Default 1. Each page has at most 400 words.",
+                    "minimum": 1
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "es",
+                      "de",
+                      "nl",
+                      "fr",
+                      "it",
+                      "pt-BR",
+                      "ru",
+                      "zh-CN",
+                      "zh-TW",
+                      "ja",
+                      "ko",
+                      "pl",
+                      "ar",
+                      "hi",
+                      "id"
+                    ],
+                    "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "id": "top3500-00002"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The tool's answer in the envelope.",
+            "headers": {
+              "LOA-Version": {
+                "description": "The version date of this API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadFreeChapterResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/get_print_options": {
+      "post": {
+        "operationId": "get_print_options",
+        "summary": "Get print options",
+        "description": "Get the print editions of one title (standard and large print; paperback or hardcover) with the normal price in US dollars where it exists, ISBN-13 and page count where known, and the address of each product page.",
+        "tags": [
+          "print"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Title id as found in a search result, for example top3500-00013 or forbidden-00004. A plain number is read as a number of the main list."
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "es",
+                      "de",
+                      "nl",
+                      "fr",
+                      "it",
+                      "pt-BR",
+                      "ru",
+                      "zh-CN",
+                      "zh-TW",
+                      "ja",
+                      "ko",
+                      "pl",
+                      "ar",
+                      "hi",
+                      "id"
+                    ],
+                    "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "id": "top3500-00002"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The tool's answer in the envelope.",
+            "headers": {
+              "LOA-Version": {
+                "description": "The version date of this API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPrintOptionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/get_publisher_info": {
+      "post": {
+        "operationId": "get_publisher_info",
+        "summary": "Get publisher info",
+        "description": "Get the publisher's standard description, the languages of the catalogue and the address of the terms page.",
+        "tags": [
+          "publisher"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "example": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The tool's answer in the envelope.",
+            "headers": {
+              "LOA-Version": {
+                "description": "The version date of this API.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPublisherInfoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "BadRequest": {
+        "description": "The request is not valid: a missing or wrong argument, or a body that is not JSON.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "The tool or the title does not exist.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "MethodNotAllowed": {
+        "description": "Tool operations take POST; the documents take GET.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "PayloadTooLarge": {
+        "description": "The body is over 8192 bytes.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "UnsupportedMediaType": {
+        "description": "A body must be JSON, with the content type application/json.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "The library could not answer just now. Try again in a moment.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Problem": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "title"
+        ]
+      },
+      "SearchResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "line": {
+            "type": "string",
+            "enum": [
+              "top3500",
+              "forbidden"
+            ]
+          },
+          "number": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "author_url": {
+            "type": "string"
+          },
+          "original_title": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "print_editions": {
+            "type": "string"
+          },
+          "free_shelf": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          },
+          "cover_url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "language",
+          "url"
+        ]
+      },
+      "PrintBlock": {
+        "type": "object",
+        "properties": {
+          "edition": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "large_print"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "product_title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "formats": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "format": {
+                  "type": "string"
+                },
+                "price_usd": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "edition",
+          "status",
+          "url"
+        ]
+      },
+      "SearchBooksData": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchResult"
+            }
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query",
+          "language",
+          "count",
+          "results"
+        ]
+      },
+      "SearchBooksResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "const": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/SearchBooksData"
+          },
+          "source": {
+            "const": "Library of Alexandria, libraryofalexandria.com"
+          }
+        },
+        "required": [
+          "ok",
+          "data",
+          "source"
+        ]
+      },
+      "GetBookData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "line": {
+            "type": "string",
+            "enum": [
+              "top3500",
+              "forbidden"
+            ]
+          },
+          "number": {
+            "type": "integer"
+          },
+          "language": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "author_url": {
+            "type": "string"
+          },
+          "original_title": {
+            "type": "string"
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "catalogue_page_url": {
+            "type": "string"
+          },
+          "cover_url": {
+            "type": "string"
+          },
+          "cover_language": {
+            "type": "string"
+          },
+          "print_editions": {
+            "type": "string"
+          },
+          "print": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrintBlock"
+            }
+          },
+          "free_shelf": {
+            "type": "boolean"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "language": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "not_available_yet": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "language",
+          "title",
+          "url",
+          "publisher",
+          "print_editions",
+          "print",
+          "free_shelf",
+          "languages",
+          "not_available_yet"
+        ]
+      },
+      "GetBookResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "const": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/GetBookData"
+          },
+          "source": {
+            "const": "Library of Alexandria, libraryofalexandria.com"
+          }
+        },
+        "required": [
+          "ok",
+          "data",
+          "source"
+        ]
+      },
+      "GetSummaryData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "book_url": {
+            "type": "string"
+          },
+          "part": {
+            "type": "integer"
+          },
+          "parts_total": {
+            "type": "integer"
+          },
+          "heading": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "short_answer": {
+            "type": "string"
+          },
+          "contents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "part": {
+                  "type": "integer"
+                },
+                "heading": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "part"
+              ]
+            }
+          },
+          "languages_available": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "language",
+          "title",
+          "available",
+          "url"
+        ]
+      },
+      "GetSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "const": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/GetSummaryData"
+          },
+          "source": {
+            "const": "Library of Alexandria, libraryofalexandria.com"
+          }
+        },
+        "required": [
+          "ok",
+          "data",
+          "source"
+        ]
+      },
+      "GetSampleData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "book_url": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "words": {
+            "type": "integer"
+          },
+          "paragraph_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "chapter_title": {
+            "type": "string"
+          },
+          "summary_available": {
+            "type": "boolean"
+          },
+          "budget": {
+            "type": "object",
+            "properties": {
+              "words_left_today": {
+                "type": "integer"
+              },
+              "resets_at": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "words_left_today",
+              "resets_at"
+            ]
+          },
+          "retry_after_s": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pages_in_free_part": {
+            "type": "integer"
+          },
+          "chapter": {
+            "type": "integer"
+          },
+          "next_page": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "language",
+          "title",
+          "available",
+          "url"
+        ]
+      },
+      "GetSampleResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "const": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/GetSampleData"
+          },
+          "source": {
+            "const": "Library of Alexandria, libraryofalexandria.com"
+          }
+        },
+        "required": [
+          "ok",
+          "data",
+          "source"
+        ]
+      },
+      "ListFreeShelfData": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "titles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchResult"
+            }
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "language",
+          "available",
+          "count",
+          "titles"
+        ]
+      },
+      "ListFreeShelfResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "const": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/ListFreeShelfData"
+          },
+          "source": {
+            "const": "Library of Alexandria, libraryofalexandria.com"
+          }
+        },
+        "required": [
+          "ok",
+          "data",
+          "source"
+        ]
+      },
+      "ReadFreeChapterData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "book_url": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "words": {
+            "type": "integer"
+          },
+          "paragraph_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "chapter_title": {
+            "type": "string"
+          },
+          "summary_available": {
+            "type": "boolean"
+          },
+          "budget": {
+            "type": "object",
+            "properties": {
+              "words_left_today": {
+                "type": "integer"
+              },
+              "resets_at": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "words_left_today",
+              "resets_at"
+            ]
+          },
+          "retry_after_s": {
+            "type": "integer"
+          },
+          "chapter": {
+            "type": "integer"
+          },
+          "chapters_total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pages_in_chapter": {
+            "type": "integer"
+          },
+          "next": {
+            "type": "object",
+            "properties": {
+              "chapter": {
+                "type": "integer"
+              },
+              "page": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "chapter",
+              "page"
+            ]
+          },
+          "sample_available": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "language",
+          "title",
+          "available",
+          "url"
+        ]
+      },
+      "ReadFreeChapterResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "const": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/ReadFreeChapterData"
+          },
+          "source": {
+            "const": "Library of Alexandria, libraryofalexandria.com"
+          }
+        },
+        "required": [
+          "ok",
+          "data",
+          "source"
+        ]
+      },
+      "GetPrintOptionsData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "editions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrintBlock"
+            }
+          },
+          "currency": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "language",
+          "title",
+          "status",
+          "editions",
+          "currency"
+        ]
+      },
+      "GetPrintOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "const": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/GetPrintOptionsData"
+          },
+          "source": {
+            "const": "Library of Alexandria, libraryofalexandria.com"
+          }
+        },
+        "required": [
+          "ok",
+          "data",
+          "source"
+        ]
+      },
+      "GetPublisherInfoData": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "native_name": {
+                  "type": "string"
+                },
+                "dir": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "website": {
+            "type": "string"
+          },
+          "terms_url": {
+            "type": "string"
+          },
+          "privacy_url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "languages",
+          "website",
+          "terms_url",
+          "privacy_url"
+        ]
+      },
+      "GetPublisherInfoResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "const": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/GetPublisherInfoData"
+          },
+          "source": {
+            "const": "Library of Alexandria, libraryofalexandria.com"
+          }
+        },
+        "required": [
+          "ok",
+          "data",
+          "source"
+        ]
+      }
+    }
+  }
+}

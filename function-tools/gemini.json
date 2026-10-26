@@ -1,0 +1,309 @@
+[
+  {
+    "function_declarations": [
+      {
+        "name": "search_books",
+        "description": "Search the catalogue of Library of Alexandria Press by words from a title or an author's name, or by a topic word, in any language of the catalogue (Chinese in simplified and traditional characters). Returns up to 8 titles with id, title, subtitle, author, language, whether print editions are available, and the address of the title page on libraryofalexandria.com. Pass the asker's language so titles and authors come back in it.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Words from a title or an author's name, or a topic word, in any language. Example: 'Moby Dick', 'Dostoevsky', 'war strategy'."
+            },
+            "language": {
+              "type": "string",
+              "enum": [
+                "en",
+                "es",
+                "de",
+                "nl",
+                "fr",
+                "it",
+                "pt-BR",
+                "ru",
+                "zh-CN",
+                "zh-TW",
+                "ja",
+                "ko",
+                "pl",
+                "ar",
+                "hi",
+                "id"
+              ],
+              "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Number of titles to return, 1 to 8. Default 8.",
+              "minimum": 1,
+              "maximum": 8
+            }
+          },
+          "required": [
+            "query"
+          ]
+        }
+      },
+      {
+        "name": "get_book",
+        "description": "Get the catalogue facts of one title: title, subtitle, author and original title in the chosen language, the cover picture address, the print editions, and the title page address in each language of the catalogue.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Title id as found in a search result, for example top3500-00013 or forbidden-00004. A plain number is read as a number of the main list."
+            },
+            "language": {
+              "type": "string",
+              "enum": [
+                "en",
+                "es",
+                "de",
+                "nl",
+                "fr",
+                "it",
+                "pt-BR",
+                "ru",
+                "zh-CN",
+                "zh-TW",
+                "ja",
+                "ko",
+                "pl",
+                "ar",
+                "hi",
+                "id"
+              ],
+              "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+            }
+          },
+          "required": [
+            "id"
+          ]
+        }
+      },
+      {
+        "name": "get_summary",
+        "description": "Read the 15-minute summary of one title: the first key idea in full, with its heading, and the headings of the other key ideas, which open in the library. Choose a key idea with 'part'. A title or a language whose summary is not open yet answers that it opens here soon.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Title id as found in a search result, for example top3500-00013 or forbidden-00004. A plain number is read as a number of the main list."
+            },
+            "language": {
+              "type": "string",
+              "enum": [
+                "en",
+                "es",
+                "de",
+                "nl",
+                "fr",
+                "it",
+                "pt-BR",
+                "ru",
+                "zh-CN",
+                "zh-TW",
+                "ja",
+                "ko",
+                "pl",
+                "ar",
+                "hi",
+                "id"
+              ],
+              "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+            },
+            "part": {
+              "type": "integer",
+              "description": "Number of the key idea, starting at 1. Default 1. Only the first key idea is given in full.",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "id"
+          ]
+        }
+      },
+      {
+        "name": "get_sample",
+        "description": "Read the free opening of one title: the first chapter of its text, in pages of at most 400 words. Pass 'page' for the next page; every answer says how many pages there are and where the text continues. Until the text is open the answer says that it opens here soon.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Title id as found in a search result, for example top3500-00013 or forbidden-00004. A plain number is read as a number of the main list."
+            },
+            "language": {
+              "type": "string",
+              "enum": [
+                "en",
+                "es",
+                "de",
+                "nl",
+                "fr",
+                "it",
+                "pt-BR",
+                "ru",
+                "zh-CN",
+                "zh-TW",
+                "ja",
+                "ko",
+                "pl",
+                "ar",
+                "hi",
+                "id"
+              ],
+              "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+            },
+            "page": {
+              "type": "integer",
+              "description": "Page of the sample, starting at 1. Default 1. Each page has at most 400 words.",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "id"
+          ]
+        }
+      },
+      {
+        "name": "list_free_shelf",
+        "description": "List the titles on the free shelf, optionally for one language and one subject, with the address of each reading page.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "language": {
+              "type": "string",
+              "enum": [
+                "en",
+                "es",
+                "de",
+                "nl",
+                "fr",
+                "it",
+                "pt-BR",
+                "ru",
+                "zh-CN",
+                "zh-TW",
+                "ja",
+                "ko",
+                "pl",
+                "ar",
+                "hi",
+                "id"
+              ],
+              "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+            },
+            "subject": {
+              "type": "string",
+              "description": "A subject word, for example 'philosophy' or 'poetry'."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Number of titles to return, 1 to 8. Default 8.",
+              "minimum": 1,
+              "maximum": 8
+            }
+          }
+        }
+      },
+      {
+        "name": "read_free_chapter",
+        "description": "Read one chapter of a title on the free shelf, in pages of at most 400 words. Chapter numbers are those of the reader's contents list; without 'chapter' the first chapter of the text is read. Every answer points to the next page. Until the text is open the answer says that it opens here soon.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Title id as found in a search result, for example top3500-00013 or forbidden-00004. A plain number is read as a number of the main list."
+            },
+            "chapter": {
+              "type": "integer",
+              "description": "Chapter number as in the reader's contents list, starting at 1. Default: the first chapter of the text.",
+              "minimum": 1
+            },
+            "page": {
+              "type": "integer",
+              "description": "Page of the chapter, starting at 1. Default 1. Each page has at most 400 words.",
+              "minimum": 1
+            },
+            "language": {
+              "type": "string",
+              "enum": [
+                "en",
+                "es",
+                "de",
+                "nl",
+                "fr",
+                "it",
+                "pt-BR",
+                "ru",
+                "zh-CN",
+                "zh-TW",
+                "ja",
+                "ko",
+                "pl",
+                "ar",
+                "hi",
+                "id"
+              ],
+              "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+            }
+          },
+          "required": [
+            "id"
+          ]
+        }
+      },
+      {
+        "name": "get_print_options",
+        "description": "Get the print editions of one title (standard and large print; paperback or hardcover) with the normal price in US dollars where it exists, ISBN-13 and page count where known, and the address of each product page.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Title id as found in a search result, for example top3500-00013 or forbidden-00004. A plain number is read as a number of the main list."
+            },
+            "language": {
+              "type": "string",
+              "enum": [
+                "en",
+                "es",
+                "de",
+                "nl",
+                "fr",
+                "it",
+                "pt-BR",
+                "ru",
+                "zh-CN",
+                "zh-TW",
+                "ja",
+                "ko",
+                "pl",
+                "ar",
+                "hi",
+                "id"
+              ],
+              "description": "Language of the person asking, as a code: en English, es Spanish, de German, nl Dutch, fr French, it Italian, pt-BR Portuguese, ru Russian, zh-CN Chinese, zh-TW Chinese in traditional characters, ja Japanese, ko Korean, pl Polish, ar Arabic, hi Hindi, id Indonesian. Titles, subtitles, authors and page addresses come back in this language. Default: the language of the query, else English."
+            }
+          },
+          "required": [
+            "id"
+          ]
+        }
+      },
+      {
+        "name": "get_publisher_info",
+        "description": "Get the publisher's standard description, the languages of the catalogue and the address of the terms page.",
+        "parameters": {
+          "type": "object",
+          "properties": {}
+        }
+      }
+    ]
+  }
+]

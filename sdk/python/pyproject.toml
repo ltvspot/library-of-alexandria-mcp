@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "loa-library"
+version = "0.1.0"
+description = "Python client for the Library of Alexandria API (catalogue, free shelf, print editions), plus plain functions for local models. Standard library only."
+requires-python = ">=3.10"
+dependencies = []
+keywords = ["books", "library", "classics", "mcp", "openapi"]
+
+[project.urls]
+Homepage = "https://libraryofalexandria.com/pages/developers"
+
+[tool.setuptools]
+py-modules = ["loa_library", "loa_tools"]

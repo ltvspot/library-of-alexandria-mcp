@@ -1,0 +1,88 @@
+<p>The library's catalogue, its free shelf and its print editions are open to programs, assistants and models as eight read-only tools. There is no key and nothing to sign up for. The tools never sign anyone in, take a payment or change anything: every title comes back with the address of its page on libraryofalexandria.com, where a person reads, listens, prints or starts.</p>
+
+<h2 id="doors">Three ways in</h2>
+<ul>
+<li><strong>MCP (Streamable HTTP)</strong> at <code>https://mcp.libraryofalexandria.com/mcp</code>: for Claude, ChatGPT, Gemini, Grok, Copilot, Perplexity, Le Chat, LM Studio, Open WebUI, Cursor, VS Code, Goose and every other MCP client.</li>
+<li><strong>REST and OpenAPI 3.1</strong>: <code>POST https://api.libraryofalexandria.com/v1/&lt;tool&gt;</code> and the OpenAPI file at <a href="https://api.libraryofalexandria.com/v1/openapi.json">https://api.libraryofalexandria.com/v1/openapi.json</a>: for scripts, automation tools (n8n, Zapier, Make, Dify, Flowise), Open WebUI tool servers and Copilot Studio.</li>
+<li><strong>Tool files for model makers</strong>: <code>GET https://api.libraryofalexandria.com/v1/tools?format=openai</code>: for any program that passes tool definitions to a model. The formats are <code>openai</code>, <code>openai-chat</code>, <code>anthropic</code>, <code>gemini</code>, <code>ollama</code> and <code>mcp</code>.</li>
+</ul>
+
+<h2 id="quick">Try it in a minute</h2>
+<pre style="overflow-x:auto;max-width:100%;padding:14px 16px;margin:0 0 18px;background:#f4efe3;border-radius:6px;font-size:14px;line-height:1.5"><code>curl -s https://api.libraryofalexandria.com/v1/search_books \
+  -H 'content-type: application/json' \
+  -d '{"query":"moby dick","limit":3}'</code></pre>
+<p>The answer is <code>{"ok": true, "data": {...}, "source": "Library of Alexandria, libraryofalexandria.com"}</code>. Each title in <code>data.results</code> has an <code>id</code>, a <code>title</code>, an <code>author</code> and the <code>url</code> of its page.</p>
+
+<h2 id="tools">The eight tools</h2>
+<ul>
+<li><code>search_books</code> (<code>query</code>, <code>language</code>, <code>limit</code>): find titles by words from a title, an author or a topic, in any language of the catalogue.</li>
+<li><code>get_book</code> (<code>id</code>, <code>language</code>): the facts of one title: author, original title, cover, print editions and its page in each language.</li>
+<li><code>get_summary</code> (<code>id</code>, <code>language</code>, <code>part</code>): the first key idea of the 15-minute summary of one title in full, and the headings of the others.</li>
+<li><code>get_sample</code> (<code>id</code>, <code>language</code>, <code>page</code>): the free opening of one title, in pages of at most 400 words.</li>
+<li><code>list_free_shelf</code> (<code>language</code>, <code>subject</code>, <code>limit</code>): the titles on the free shelf, by language and subject.</li>
+<li><code>read_free_chapter</code> (<code>id</code>, <code>chapter</code>, <code>page</code>, <code>language</code>): one chapter of a free-shelf title, in pages of at most 400 words.</li>
+<li><code>get_print_options</code> (<code>id</code>, <code>language</code>): the print editions of one title (standard and large print, paperback or hardcover) with the US dollar price of each.</li>
+<li><code>get_publisher_info</code>: who publishes the library, its languages, the terms and the privacy page.</li>
+</ul>
+<p>A summary, a sample page or a free-shelf chapter that is not open yet (a title, a language, or all texts before they go online) answers plainly that it opens here soon. It then fills in without any change on your side. There is no tool that returns a whole book: the tools return small, limited pieces, and count the words they hand out for each client (72,000 a day and 48,000 an hour; the answer shows what is left).</p>
+
+<h2 id="mcp">Connect an assistant</h2>
+<p>All eight tools only read, so any client may allow them without asking each time. The address is <code>https://mcp.libraryofalexandria.com/mcp</code>.</p>
+<ul>
+<li><strong>Claude:</strong> Settings, Connectors, Add custom connector. In Claude Code: <code>claude mcp add --transport http library-of-alexandria https://mcp.libraryofalexandria.com/mcp</code></li>
+<li><strong>ChatGPT:</strong> open chatgpt.com/plugins, choose the plus button and Add custom MCP server, enter the address and create the plugin.</li>
+<li><strong>Cursor:</strong> add <code>"library-of-alexandria": {"url": "https://mcp.libraryofalexandria.com/mcp"}</code> under <code>mcpServers</code> in <code>~/.cursor/mcp.json</code>.</li>
+<li><strong>VS Code:</strong> run MCP: Add Server from the Command Palette, choose HTTP and enter the address.</li>
+<li><strong>LM Studio (0.3.17 or newer):</strong> Program tab, Install, Edit mcp.json, then add the same <code>url</code> entry under <code>mcpServers</code>.</li>
+<li><strong>Open WebUI (0.6.31 or newer):</strong> Settings, Admin, Integrations, External Tool Servers, Add Connection, type MCP (Streamable HTTP), the address, no authentication. Or choose the OpenAPI type and enter the address of the OpenAPI file.</li>
+<li><strong>OpenAI Responses API:</strong> pass <code>{"type": "mcp", "server_label": "library", "server_url": "https://mcp.libraryofalexandria.com/mcp", "allowed_tools": ["search_books", "get_book"], "require_approval": "never"}</code> in <code>tools</code>.</li>
+</ul>
+<p>Small local models do best with a short tool list: connect only the tools the task needs.</p>
+
+<h2 id="rest">Call the REST API</h2>
+<p>Every tool is one operation, <code>POST /v1/&lt;tool&gt;</code>, with the tool's arguments as a JSON object and no key.</p>
+<pre style="overflow-x:auto;max-width:100%;padding:14px 16px;margin:0 0 18px;background:#f4efe3;border-radius:6px;font-size:14px;line-height:1.5"><code>// JavaScript (Node 18 or newer, browsers, Deno, Bun, Workers)
+const res = await fetch("https://api.libraryofalexandria.com/v1/get_book", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ id: "top3500-00002", language: "en" }),
+});
+const { ok, data } = await res.json();
+console.log(data.title, data.url);</code></pre>
+<pre style="overflow-x:auto;max-width:100%;padding:14px 16px;margin:0 0 18px;background:#f4efe3;border-radius:6px;font-size:14px;line-height:1.5"><code># Python, standard library only
+import json, urllib.request
+
+req = urllib.request.Request(
+    "https://api.libraryofalexandria.com/v1/list_free_shelf",
+    data=json.dumps({"language": "es", "limit": 5}).encode(),
+    headers={"content-type": "application/json"},
+)
+print(json.load(urllib.request.urlopen(req))["data"]["titles"])</code></pre>
+
+<h2 id="files">The OpenAPI file and the tool files</h2>
+<p>The OpenAPI 3.1 file at <a href="https://api.libraryofalexandria.com/v1/openapi.json">/v1/openapi.json</a> describes every operation, its arguments and the shape of its answer. Import it into Open WebUI, Dify, Flowise, Copilot Studio or any OpenAPI tool. For programs that pass tool definitions to a model, <code>GET /v1/tools?format=</code> returns the eight tools in the shape each maker wants: <code>openai</code> (Responses API), <code>openai-chat</code> (Chat Completions), <code>anthropic</code>, <code>gemini</code>, <code>ollama</code>, and <code>mcp</code> (the list the MCP server shows). Answer the calls the model makes with the REST operations above.</p>
+
+<h2 id="errors">Errors</h2>
+<p>A problem comes back as <code>application/problem+json</code> (RFC 9457) with <code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code> and a stable <code>code</code>.</p>
+<ul>
+<li><strong>400</strong> <code>invalid_json</code>, <code>invalid_request</code>, <code>unknown_format</code>: the body is not JSON, an argument is missing or wrong (the detail says which), or the tool file format is unknown.</li>
+<li><strong>404</strong> <code>unknown_tool</code>, <code>not_found</code>: there is no such tool, or no such title.</li>
+<li><strong>405</strong> <code>method_not_allowed</code>: tools take POST; the documents take GET.</li>
+<li><strong>413</strong> <code>payload_too_large</code>: the body is over 8 KB.</li>
+<li><strong>415</strong> <code>unsupported_media_type</code>: a body must be JSON.</li>
+<li><strong>500</strong> <code>internal</code>: the library could not answer just now. Try again in a moment.</li>
+</ul>
+
+<h2 id="use">Using the answers</h2>
+<ul>
+<li>Say what the answer says and use the <code>url</code> of a title as given. Do not invent a price or an offer.</li>
+<li>The library is not the ancient library of Alexandria and not the Bibliotheca Alexandrina.</li>
+<li>Payments and sign-up happen on libraryofalexandria.com only. A tool can hand over a link; it never takes a payment.</li>
+<li>No key is needed. Please keep to a few requests a second and send a <code>User-Agent</code> that names your program.</li>
+</ul>
+
+<h2 id="privacy">Privacy</h2>
+<p>The service counts calls by tool name, status and the name and version of the client. It does not keep what was asked, and it sets no cookies. The <a href="https://libraryofalexandria.com/policies/privacy-policy">privacy policy</a> and the <a href="https://libraryofalexandria.com/policies/terms-of-service">terms of service</a> apply.</p>
+
+<h2 id="versions">Versions</h2>
+<p>The API version is a date, sent back in the <code>LOA-Version</code> header (now <code>2026-10-25</code>). Changes are announced on this page.</p>
